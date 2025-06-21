@@ -1,8 +1,8 @@
 {
-  "name": "netlify-functions",
+  "name": "tatilkaptani-website",
   "version": "1.0.0",
-  "description": "Netlify Functions for TatilKaptani.com",
-  "main": "functions/callOpenRouterAI.js",
+  "description": "TatilKaptani.com Frontend and Netlify Functions",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
