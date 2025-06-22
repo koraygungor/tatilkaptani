@@ -504,7 +504,7 @@
         const firestore = firebase.firestore();
         const functions = firebase.functions(); // Cloud Functions SDK'sını başlat
 
-        // Global Değişkenler
+        // Global Değişkenler (DOM'a referans verenler, başlangıçta null veya boş olarak tanımlanır)
         let currentUserId = null;
         let voiceEnabled = true;
         let tatilPuan = 0;
@@ -514,13 +514,34 @@
         let gameActive = false;
         let currentQuestionIndex = 0;
         let gameScore = 0;
-        let currentGeneratedImages = []; // Son oluşturulan fotoğrafların URL'lerini tutmak için
-        let generatedVirtualImageUrl = ''; // Sanal tur hediye fotoğrafının URL'sini tutmak için
-        let currentVipPlan = ""; // VIP planını saklamak için
-        let palmCoinHistory = []; // PalmCoin geçmişi için dizi
-        let chatHistory = []; // Main chat history
+        let currentGeneratedImages = [];
+        let generatedVirtualImageUrl = '';
+        let currentVipPlan = "";
+        let palmCoinHistory = [];
+        let chatHistory = [];
         let aiCompanion = null;
-        let companionChatHistory = []; // AI Yoldaş sohbet geçmişi
+        let companionChatHistory = [];
+        let currentGameQuestion = null;
+        let selectedBudget = "";
+
+        // DOM Element Referanslarını Global Olarak Bildir (ancak değer ataması DOM hazır olunca yapılacak)
+        let loginBtn, registerBtn, logoutBtn, authButtons, loggedInUserSection, usernameDisplay;
+        let chatBox, chatInput, sendChatBtn, chatLoading, tatilpuanTop, sloganTop, voiceToggleTop, languageSelect, userIdDisplay, sidebarButtons, contentSections;
+        let appModal, modalTitle, modalMessage, modalConfirmBtn;
+        let loginModal, registerModal, forgotPasswordModal, loginEmailInput, loginPasswordInput, performLoginBtn, loginMessage, registerUsernameInput, registerEmailInput, registerPasswordInput, performRegisterBtn, registerMessage, resetEmailInput, performResetBtn, resetMessage, forgotPasswordLink, closeButtons;
+        let startGameBtn, gameOutput, gameAnswerInput, submitGameAnswerBtn;
+        let virtualCityInput, virtualDaysInput, virtualDurationMinutesInput, virtualActivitiesInput, virtualImagePromptInput, virtualTourCostEl, startVirtualBtn, virtualHolidayOutput, virtualOutputTitle, virtualOutputStory, virtualImagesContainer, sendVirtualImageEmailBtn, virtualLoading;
+        let aiPhotoAccessCheck, goToAiPhotoPaymentBtn, aiPhotoFormArea, aiPhotoPromptInput, aiPhotoStyleSelect, aiPhotoCountInput, generateAiPhotoButton, aiPhotoLoading, aiPhotoOutput, generatedImagesContainer, downloadAllImagesBtn, downloadAllCostSpan;
+        let vipAccessCheck, goToVipPaymentBtn, vipPlannerFormArea, vipDestinationInput, vipDurationInput, vipTravelersInput, vipBudgetButtons, vipTypeSelect, generateVipPlanBtn, vipPlannerLoading, vipPlanOutput, vipPlanChatArea, vipPlanChatBox, vipPlanInput, sendVipPlanMessageBtn;
+        let nicheTopicInput, nicheDetailsTextarea, generateNichePlanBtn, nichePlanLoading, nichePlanOutput;
+        let displayUserId, displayUsername, displayUserEmail, setuserEmailBtn, displayTatilpuan, displayMembershipLevel, displayGameScore, updateUsernameBtn, palmCoinHistoryList;
+        let adminMessageInput, updateAdminMessageBtn, adminMessageLoading, adminDisplayMessageEl;
+        let timeTravelAccessCheck, goToTimeTravelPaymentBtn, timeTravelFormArea, timeTravelEraInput, timeTravelDurationInput, timeTravelCharacterInput, timeTravelFocusInput, startTimeTravelBtn, timeTravelLoading, timeTravelOutput;
+        let destinyAgeInput, destinyHobbyInput, destinyDreamInput, destinyColorInput, predictDestinyBtn, destinyLoading, destinyRouteOutput, realizeDestinyBtn;
+        let companionNameInput, companionPersonalitySelect, createCompanionBtn, companionChatArea, activeCompanionName, companionChatBox, companionInput, sendCompanionMessageBtn, companionLoading;
+        let cardNumberInput, expiryDateInput, cvvInput, cardHolderNameInput, completePaymentBtn;
+        let contactSubjectInput, contactEmailInput, contactMessageInput, contactFileInput, sendContactFormBtn, contactLoading;
+
 
         const sloganList = [
             "Hayalindeki tatili Palmiye Kaptan'la keşfet!",
@@ -531,186 +552,15 @@
             "Yeni rotalar, yeni maceralar Palmiye Kaptan'la başlar!"
         ];
         let currentSloganIndex = 0;
-        let currentGameQuestion = null; // Aktif soruyu ve cevabı tutar
-
-        // --- DOM Elementleri ---
-        // Header'daki login/register/logout butonları için tanımlar
-        const loginBtn = document.getElementById('loginBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const authButtons = document.getElementById('authButtons');
-        const loggedInUserSection = document.getElementById('loggedInUser');
-        const usernameDisplay = document.getElementById('usernameDisplay');
-
-        // Sohbet Asistanı
-        const chatBox = document.getElementById("chat-box");
-        const chatInput = document.getElementById("user-input-chat");
-        const sendChatBtn = document.getElementById("send-button-chat");
-        const chatLoading = document.getElementById("chat-loading");
-        const tatilpuanTop = document.getElementById("tatilpuan-top");
-        const sloganTop = document.getElementById("slogan-top");
-        const voiceToggleTop = document.getElementById("voice-toggle-top");
-        const languageSelect = document.getElementById("language-select");
-        // const avatarEl = document.getElementById("avatar"); // Avatar kaldırıldığı için bu satır gereksiz
-        const userIdDisplay = document.getElementById("user-id-display");
-        const sidebarButtons = document.querySelectorAll(".sidebar-nav button");
-        const contentSections = document.querySelectorAll(".content-section");
-
-        // Modallar
-        const appModal = document.getElementById("appModal");
-        const modalTitle = document.getElementById("modalTitle");
-        const modalMessage = document.getElementById("modalMessage");
-        const modalConfirmBtn = document.getElementById("modalConfirmBtn");
-
-        // Giriş/Kayıt Modalları
-        const loginModal = document.getElementById('loginModal');
-        const registerModal = document.getElementById('registerModal');
-        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-        const loginEmailInput = document.getElementById('loginEmail');
-        const loginPasswordInput = document.getElementById('loginPassword');
-        const performLoginBtn = document.getElementById('performLoginBtn');
-        const loginMessage = document.getElementById('loginMessage');
-        const registerUsernameInput = document.getElementById('registerUsername');
-        const registerEmailInput = document.getElementById('registerEmail');
-        const registerPasswordInput = document.getElementById('registerPassword');
-        const performRegisterBtn = document.getElementById('performRegisterBtn');
-        const registerMessage = document.getElementById('registerMessage');
-        const resetEmailInput = document.getElementById('resetEmail');
-        const performResetBtn = document.getElementById('performResetBtn');
-        const resetMessage = document.getElementById('resetMessage');
-        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        const closeButtons = document.querySelectorAll('.close-button');
-
-        // Tatil Avı (Oyun)
-        const startGameBtn = document.getElementById("start-game-btn");
-        const gameOutput = document.getElementById("game-output");
-        const gameAnswerInput = document.getElementById("game-answer-input");
-        const submitGameAnswerBtn = document.getElementById("submit-game-answer-btn");
-
-        // Sanal Tatil Planı
-        const virtualCityInput = document.getElementById("virtual-city");
-        const virtualDaysInput = document.getElementById("virtual-days");
-        const virtualDurationMinutesInput = document.getElementById("virtual-duration-minutes");
-        const virtualActivitiesInput = document.getElementById("virtual-activities");
-        const virtualImagePromptInput = document.getElementById("virtual-image-prompt");
-        const virtualTourCostEl = document.getElementById("virtual-tour-cost");
-        const startVirtualBtn = document.getElementById("start-virtual-btn");
-        const virtualHolidayOutput = document.getElementById("virtual-holiday-output");
-        const virtualOutputTitle = document.getElementById("virtual-output-title");
-        const virtualOutputStory = document.getElementById("virtual-output-story");
-        const virtualImagesContainer = document.getElementById("virtual-images-container");
-        const sendVirtualImageEmailBtn = document.getElementById("send-virtual-image-email-btn");
-        const virtualLoading = document.getElementById("virtual-loading");
-
-        // AI Fotoğraf Stüdyosu
-        const aiPhotoAccessCheck = document.getElementById("ai-photo-access-check");
-        const goToAiPhotoPaymentBtn = document.getElementById("go-to-ai-photo-payment-btn");
-        const aiPhotoFormArea = document.getElementById("ai-photo-form-area");
-        const aiPhotoPromptInput = document.getElementById("ai-photo-prompt");
-        const aiPhotoStyleSelect = document.getElementById("ai-photo-style");
-        const aiPhotoCountInput = document.getElementById("ai-photo-count");
-        const generateAiPhotoButton = document.getElementById("generate-ai-photo-btn");
-        const aiPhotoLoading = document.getElementById("ai-photo-loading");
-        const aiPhotoOutput = document.getElementById("ai-photo-output");
-        const generatedImagesContainer = document.getElementById("generated-images-container");
-        const downloadAllImagesBtn = document.getElementById("download-all-images-btn");
-        const downloadAllCostSpan = document.getElementById("download-all-cost");
-
-        // VIP Planlayıcı
-        const vipAccessCheck = document.getElementById("vip-access-check");
-        const goToVipPaymentBtn = document.getElementById("go-to-vip-payment-btn");
-        const vipPlannerFormArea = document.getElementById("vip-planner-form-area");
-        const vipDestinationInput = document.getElementById("vip-destination");
-        const vipDurationInput = document.getElementById("vip-duration");
-        const vipTravelersInput = document.getElementById("vip-travelers");
-        const vipBudgetButtons = document.querySelectorAll("#vip-planner-section .budget-options button");
-        const vipTypeSelect = document.getElementById("vip-type");
-        const generateVipPlanBtn = document.getElementById("generate-vip-plan-btn");
-        const vipPlannerLoading = document.getElementById("vip-planner-loading");
-        const vipPlanOutput = document.getElementById("vip-plan-output");
-        let selectedBudget = "";
-        const vipPlanChatArea = document.getElementById("vip-plan-chat-area");
-        const vipPlanChatBox = document.getElementById("vip-plan-chat-box");
-        const vipPlanInput = document.getElementById("vip-plan-input");
-        const sendVipPlanMessageBtn = document.getElementById("send-vip-plan-message-btn");
-
-        // Niş Tur Talebi
-        const nicheTopicInput = document.getElementById("niche-topic");
-        const nicheDetailsTextarea = document.getElementById("niche-details");
-        const generateNichePlanBtn = document.getElementById("generate-niche-plan-btn");
-        const nichePlanLoading = document.getElementById("niche-plan-loading");
-        const nichePlanOutput = document.getElementById("niche-plan-output");
-
-        // Kullanıcı Bilgileri
-        const displayUserId = document.getElementById("display-userid");
-        const displayUsername = document.getElementById("display-username");
-        const displayUserEmail = document.getElementById("display-user-email");
-        const setuserEmailBtn = document.getElementById("set-user-email-btn");
-        const displayTatilpuan = document.getElementById("display-tatilpuan");
-        const displayMembershipLevel = document.getElementById("display-membership-level");
-        const displayGameScore = document.getElementById("display-game-score");
-        const updateUsernameBtn = document.getElementById("update-username-btn"); // ID güncellendi
-        const palmCoinHistoryList = document.getElementById("palmcoin-history-list");
-
-        // Yönetici Mesajı
-        const adminMessageInput = document.getElementById("admin-message-input");
-        const updateAdminMessageBtn = document.getElementById("update-admin-message-btn");
-        const adminMessageLoading = document.getElementById("admin-message-loading");
-        const adminDisplayMessageEl = document.getElementById("admin-display-message"); // Added for direct access
-
-        // Zamanda Yolculuk
-        const timeTravelAccessCheck = document.getElementById("time-travel-access-check");
-        const goToTimeTravelPaymentBtn = document.getElementById("go-to-time-travel-payment-btn");
-        const timeTravelFormArea = document.getElementById("time-travel-form-area");
-        const timeTravelEraInput = document.getElementById("time-travel-era");
-        const timeTravelDurationInput = document.getElementById("time-travel-duration");
-        const timeTravelCharacterInput = document.getElementById("time-travel-character");
-        const timeTravelFocusInput = document.getElementById("time-travel-focus");
-        const startTimeTravelBtn = document.getElementById("start-time-travel-btn");
-        const timeTravelLoading = document.getElementById("time-travel-loading");
-        const timeTravelOutput = document.getElementById("time-travel-output");
-
-        // Kader Rotası
-        const destinyAgeInput = document.getElementById("destiny-age");
-        const destinyHobbyInput = document.getElementById("destiny-hobby");
-        const destinyDreamInput = document.getElementById("destiny-dream");
-        const destinyColorInput = document.getElementById("destiny-color");
-        const predictDestinyBtn = document.getElementById("predict-destiny-btn");
-        const destinyLoading = document.getElementById("destiny-loading");
-        const destinyRouteOutput = document.getElementById("destiny-route-output");
-        const realizeDestinyBtn = document.getElementById("realize-destiny-btn");
-
-        // AI Yoldaşım
-        const companionNameInput = document.getElementById("companion-name");
-        const companionPersonalitySelect = document.getElementById("companion-personality");
-        const createCompanionBtn = document.getElementById("create-companion-btn");
-        const companionChatArea = document.getElementById("companion-chat-area");
-        const activeCompanionName = document.getElementById("active-companion-name");
-        const companionChatBox = document.getElementById("companion-chat-box");
-        const companionInput = document.getElementById("companion-input");
-        const sendCompanionMessageBtn = document.getElementById("send-companion-message-btn");
-        const companionLoading = document.getElementById("companion-loading");
-
-        // Ödeme
-        const cardNumberInput = document.getElementById("card-number");
-        const expiryDateInput = document.getElementById("expiry-date");
-        const cvvInput = document.getElementById("cvv");
-        const cardHolderNameInput = document.getElementById("card-holder-name");
-        const completePaymentBtn = document.getElementById("complete-payment-btn");
-
-        // Bize Ulaşın Bölümü
-        const contactSubjectInput = document.getElementById('contact-subject');
-        const contactEmailInput = document.getElementById('contact-email');
-        const contactMessageInput = document.getElementById('contact-message');
-        const contactFileInput = document.getElementById('contact-file');
-        const sendContactFormBtn = document.getElementById('send-contact-form-btn');
-        const contactLoading = document.getElementById('contact-loading');
 
 
         // --- Uygulama Başlangıcı ve Genel Fonksiyonlar ---
+        // Bu fonksiyonlar, DOM elementlerine doğrudan erişmeden önce çağrılmamalıdır.
         window.initializeAppFeatures = function() {
             // Slogan başlatma
             updateSlogan();
+            // Sayfa yüklendiğinde varsayılan olarak "Sohbet Asistanı" bölümünü göster
+            window.showSection("chat-section");
         };
 
         // Modalları gizlemek için yardımcı fonksiyon
@@ -720,45 +570,6 @@
             }
         }
         window.hideModal = hideModal;
-
-        // --- Firebase Authentication ve Kullanıcı Durumu ---
-        auth.onAuthStateChanged(async (user) => {
-            const mainLayout = document.querySelector('.main-layout');
-            if (user) {
-                currentUserId = user.uid;
-                if (authButtons) authButtons.style.display = 'none';
-                if (loggedInUserSection) loggedInUserSection.style.display = 'flex';
-                if (usernameDisplay) usernameDisplay.textContent = user.displayName || user.email;
-                if (mainLayout) {
-                    mainLayout.style.display = 'flex';
-                }
-                await loadUserProfile(); // Kullanıcı girişi sonrası profili yükle
-                loadAdminMessage(); // Yönetici mesajını yükle
-                loadAds(); // Reklamları yükle (şu an statik HTML reklamları gösteriyor)
-            } else {
-                currentUserId = null;
-                if (authButtons) authButtons.style.display = 'flex';
-                if (loggedInUserSection) loggedInUserSection.style.display = 'none';
-                // Kullanıcı bilgilerini sıfırla
-                userName = "Misafir";
-                tatilPuan = 0;
-                userMembershipLevel = "Bronz";
-                gameScore = 0;
-                userEmail = "Ayarlanmadı";
-                palmCoinHistory = [];
-                displayMembershipInfo();
-                updateTatilPuanDisplay();
-                updatePalmCoinHistoryDisplay();
-                if (userIdDisplay) userIdDisplay.textContent = `UID: Misafir`;
-                if (mainLayout) {
-                    mainLayout.style.display = 'flex'; // Giriş yapılmasa bile ana düzeni göster (ücretsiz özellikler için)
-                }
-                // Açık tüm modalları kapat
-                hideModal(loginModal);
-                hideModal(registerModal);
-                hideModal(forgotPasswordModal);
-            }
-        });
 
         // --- Firebase Kullanıcı Verileri Fonksiyonları ---
         window.getUserProfileRef = function() {
@@ -847,21 +658,17 @@
         };
 
         window.loadAds = async function() {
-            // Dinamik reklamları Firestore'dan yükleme kodunuz buraya gelebilir.
-            // Mevcut HTML statik reklamları kullandığı için, bu fonksiyon çoğunlukla bir yer tutucudur.
             const adsCollectionRef = window.getAdsCollectionRef();
             if (!adsCollectionRef) {
                 console.log("Reklam koleksiyonu referansı mevcut değil.");
                 return;
             }
-            // Firestore'dan dinamik reklamları çekme örneği (eğer isterseniz bu yorum satırlarını kaldırıp kullanabilirsiniz)
             /*
             try {
                 const snapshot = await adsCollectionRef.get();
                 const ads = snapshot.docs.map(doc => doc.data());
                 const dynamicAdsContainer = document.getElementById('dynamic-ads-container');
                 if (dynamicAdsContainer) {
-                    // Mevcut statik reklamları değiştirmek isterseniz:
                     dynamicAdsContainer.innerHTML = '';
                     ads.forEach(ad => {
                         const adElement = document.createElement('a');
@@ -911,11 +718,8 @@
             });
         };
 
-        // Bu fonksiyon artık bir Cloud Function'ı çağıracak
         window.updateAdminMessage = async function(message) {
             const updateAdminMessageCallable = firebase.functions().httpsCallable('updateAdminMessage');
-            const adminMessageLoadingEl = document.getElementById("admin-message-loading");
-
             if (adminMessageLoadingEl) adminMessageLoadingEl.style.display = 'block';
             try {
                 const result = await updateAdminMessageCallable({ message: message });
@@ -937,39 +741,33 @@
 
         // --- Genel UI ve Yardımcı Fonksiyonlar ---
         window.showModal = function(title, message) {
-            const modal = document.getElementById("appModal");
-            const modalTitleEl = document.getElementById("modalTitle");
-            const modalMessageEl = document.getElementById("modalMessage");
-            const modalConfirmBtnEl = document.getElementById("modalConfirmBtn");
-
-            if (!modal || !modalTitleEl || !modalMessageEl || !modalConfirmBtnEl) {
+            if (!appModal || !modalTitle || !modalMessage || !modalConfirmBtn) {
                 console.error("Modal elementleri bulunamadı. Modal gösterilemiyor.");
                 return Promise.resolve(false);
             }
 
-            modalTitleEl.textContent = title;
-            modalMessageEl.innerHTML = message;
-            modal.style.display = "flex";
+            modalTitle.textContent = title;
+            modalMessage.innerHTML = message;
+            appModal.style.display = "flex";
 
-            // Önceki olay dinleyiciyi kaldır
-            const oldConfirmListener = modalConfirmBtnEl._eventListener;
+            const oldConfirmListener = modalConfirmBtn._eventListener;
             if (oldConfirmListener) {
-                modalConfirmBtnEl.removeEventListener("click", oldConfirmListener);
+                modalConfirmBtn.removeEventListener("click", oldConfirmListener);
             }
 
             return new Promise((resolve) => {
                 const handleConfirm = () => {
-                    modal.style.display = "none";
-                    modalConfirmBtnEl.removeEventListener("click", handleConfirm);
-                    modalConfirmBtnEl._eventListener = null; // Bellek sızıntısını önle
+                    appModal.style.display = "none";
+                    modalConfirmBtn.removeEventListener("click", handleConfirm);
+                    modalConfirmBtn._eventListener = null;
                     resolve(true);
                 };
-                modalConfirmBtnEl.addEventListener("click", handleConfirm);
-                modalConfirmBtnEl._eventListener = handleConfirm; // Dinleyiciyi sakla
+                modalConfirmBtn.addEventListener("click", handleConfirm);
+                modalConfirmBtn._eventListener = handleConfirm;
             });
         };
 
-        window.displayMessage = function(sender, text, chatBoxElement = chatBox) {
+        window.displayMessage = function(sender, text, chatBoxElement) { // chatBoxElement parametresi eklendi
             if (!chatBoxElement) {
                 console.error("Sohbet kutusu elementi bulunamadı.");
                 return;
@@ -984,11 +782,10 @@
         };
 
         window.speak = function(text) {
-            const languageSelectEl = document.getElementById("language-select");
-            if (!languageSelectEl || !voiceEnabled || !window.speechSynthesis) return;
+            if (!languageSelect || !voiceEnabled || !window.speechSynthesis) return;
 
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = languageSelectEl.value + "-" + languageSelectEl.value.toUpperCase(); // örn: "tr-TR", "en-US"
+            utterance.lang = languageSelect.value + "-" + languageSelect.value.toUpperCase();
             speechSynthesis.speak(utterance);
         };
 
@@ -1003,7 +800,7 @@
             });
 
             if (palmCoinHistory.length > 20) {
-                palmCoinHistory = palmCoinHistory.slice(palmCoinHistory.length - 20); // Son 20 girişi tut
+                palmCoinHistory = palmCoinHistory.slice(palmCoinHistory.length - 20);
             }
 
             const oldLevel = userMembershipLevel;
@@ -1015,22 +812,21 @@
                 userMembershipLevel = "Altın";
             }
 
-            if (currentUserId) { // Sadece giriş yapmış kullanıcılar için güncelle
+            if (currentUserId) {
                 await window.updateUserProfile({
                     tatilPuanlari: tatilPuan,
                     membershipLevel: userMembershipLevel,
                     palmCoinHistory: palmCoinHistory,
-                    gameScore: gameScore // gameScore'u da güncel tut
+                    gameScore: gameScore
                 });
             }
-
 
             if (oldLevel !== userMembershipLevel) {
                 window.showModal("Tebrikler!", `Üyelik seviyeniz **${userMembershipLevel}** seviyesine yükseldi! Yeni özelliklere göz atın.`);
                 window.speak(`Tebrikler! Üyelik seviyeniz ${userMembershipLevel} seviyesine yükseldi!`);
             }
             window.updatePalmCoinHistoryDisplay();
-            window.updateTatilPuanDisplay(); // UI'nin güncel olduğundan emin ol
+            window.updateTatilPuanDisplay();
         };
 
         window.updateTatilPuanDisplay = function() {
@@ -1054,7 +850,6 @@
         window.updatePalmCoinHistoryDisplay = function() {
             if (!palmCoinHistoryList) return;
             palmCoinHistoryList.innerHTML = '';
-            // Ters kronolojik sırayla göster
             palmCoinHistory.slice().reverse().forEach(entry => {
                 const listItem = document.createElement("li");
                 const date = new Date(entry.timestamp).toLocaleString();
@@ -1078,7 +873,7 @@
             const activeSection = document.getElementById(sectionId);
             if (activeSection) {
                 activeSection.classList.add("active");
-                activeSection.style.display = "flex"; // 'block' yerine 'flex' düzenli bir yerleşim için
+                activeSection.style.display = "flex";
             }
 
             sidebarButtons.forEach(button => button.classList.remove("active"));
@@ -1087,24 +882,23 @@
                 activeButton.classList.add("active");
             }
 
-            // Özel bölüm kontrolleri
             if (sectionId === "vip-planner-section") {
-                window.checkVipAccess(document.getElementById("vip-access-check"), document.getElementById("vip-planner-form-area"), "Altın");
-                window.checkVipAccess(document.getElementById("vip-access-check"), document.getElementById("niche-vip-request-area"), "Altın");
+                window.checkVipAccess(aiPhotoAccessCheck, vipPlannerFormArea, "Altın"); // Kontrol edilecek
+                window.checkVipAccess(aiPhotoAccessCheck, nicheVipRequestArea, "Altın"); // Kontrol edilecek
                 if (vipPlanChatArea) vipPlanChatArea.style.display = 'none';
                 if (vipPlanOutput) vipPlanOutput.style.display = 'none';
                 currentVipPlan = "";
             } else if (sectionId === "time-travel-section") {
-                window.checkVipAccess(document.getElementById("time-travel-access-check"), document.getElementById("time-travel-form-area"), "Altın");
+                window.checkVipAccess(timeTravelAccessCheck, timeTravelFormArea, "Altın");
             } else if (sectionId === "ai-photo-studio-section") {
-                window.checkVipAccess(document.getElementById("ai-photo-access-check"), document.getElementById("ai-photo-form-area"), "Altın");
+                window.checkVipAccess(aiPhotoAccessCheck, aiPhotoFormArea, "Altın");
                 if (generatedImagesContainer) generatedImagesContainer.innerHTML = '';
                 if (downloadAllImagesBtn) downloadAllImagesBtn.style.display = 'none';
                 if (aiPhotoOutput) aiPhotoOutput.style.display = 'none';
                 currentGeneratedImages = [];
             } else if (sectionId === "user-info-section") {
                 window.displayMembershipInfo();
-                window.loadAdminMessage(); // Yönetici mesajını kullanıcı bilgileri bölümünde yeniden yükle
+                window.loadAdminMessage();
                 window.updatePalmCoinHistoryDisplay();
             } else if (sectionId === "payment-section") {
                 if (cardNumberInput) cardNumberInput.value = '';
@@ -1123,12 +917,11 @@
                 if (destinyRouteOutput) destinyRouteOutput.style.display = "none";
                 if (realizeDestinyBtn) realizeDestinyBtn.style.display = "none";
             }
-            // "Bize Ulaşın" bölümü için temizlik (varsa)
             if (sectionId === "contact-us-section") {
                 if (contactSubjectInput) contactSubjectInput.value = '';
                 if (contactEmailInput) contactEmailInput.value = userEmail !== "Ayarlanmadı" ? userEmail : '';
                 if (contactMessageInput) contactMessageInput.value = '';
-                if (contactFileInput) contactFileInput.value = ''; // Dosya inputunu temizle
+                if (contactFileInput) contactFileInput.value = '';
             }
         };
 
@@ -1146,7 +939,6 @@
             }
         };
 
-        // OpenRouter AI Çağrısı (Metin Tabanlı AI için) - Artık Cloud Function kullanıyor
         window.callOpenRouterAI = async function(prompt, model = "openai/gpt-3.5-turbo", loadingIndicator = null, currentChatHistory = []) {
             if (loadingIndicator) loadingIndicator.style.display = "block";
 
@@ -1163,14 +955,13 @@
             }
         };
 
-        // Google Gemini API Çağrısı (Görsel Oluşturma için) - Artık Cloud Function kullanıyor
         window.callImageGenerationAI = async function(promptText, loadingIndicator = null) {
             if (loadingIndicator) loadingIndicator.style.display = "block";
 
             try {
                 const callImageAI = firebase.functions().httpsCallable('callImageGenerationAI');
                 const result = await callImageAI({ promptText: promptText });
-                return result.data.imageUrl; // Cloud Function'dan gelen imageUrl'yi döndür
+                return result.data.imageUrl;
             } catch (error) {
                 console.error("Gemini Görsel Oluşturma AI Hatası (Cloud Function):", error);
                 window.showModal("Görsel Oluşturma Hatası!", `Görsel oluşturulurken bir sorun oluştu: ${error.message}.`);
@@ -1180,9 +971,174 @@
             }
         };
 
+        // --- Slogan Güncelleme ---
+        // Slogan listesi zaten tanımlı.
+        function updateSlogan() {
+            if (sloganTop) { // sloganTop'ın tanımlı olduğundan emin ol
+                sloganTop.textContent = sloganList[currentSloganIndex];
+            }
+            currentSloganIndex = (currentSloganIndex + 1) % sloganList.length;
+        }
 
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', async () => {
+            // TÜM DOM ELEMENTLERİNE BURADA DEĞER ATAMASI YAPILIR
+            loginBtn = document.getElementById('loginBtn');
+            registerBtn = document.getElementById('registerBtn');
+            logoutBtn = document.getElementById('logoutBtn');
+            authButtons = document.getElementById('authButtons');
+            loggedInUserSection = document.getElementById('loggedInUser');
+            usernameDisplay = document.getElementById('usernameDisplay');
+
+            chatBox = document.getElementById("chat-box");
+            chatInput = document.getElementById("user-input-chat");
+            sendChatBtn = document.getElementById("send-button-chat");
+            chatLoading = document.getElementById("chat-loading");
+            tatilpuanTop = document.getElementById("tatilpuan-top");
+            sloganTop = document.getElementById("slogan-top");
+            voiceToggleTop = document.getElementById("voice-toggle-top");
+            languageSelect = document.getElementById("language-select");
+            userIdDisplay = document.getElementById("user-id-display");
+            sidebarButtons = document.querySelectorAll(".sidebar-nav button");
+            contentSections = document.querySelectorAll(".content-section");
+
+            appModal = document.getElementById("appModal");
+            modalTitle = document.getElementById("modalTitle");
+            modalMessage = document.getElementById("modalMessage");
+            modalConfirmBtn = document.getElementById("modalConfirmBtn");
+
+            loginModal = document.getElementById('loginModal');
+            registerModal = document.getElementById('registerModal');
+            forgotPasswordModal = document.getElementById('forgotPasswordModal');
+            loginEmailInput = document.getElementById('loginEmail');
+            loginPasswordInput = document.getElementById('loginPassword');
+            performLoginBtn = document.getElementById('performLoginBtn');
+            loginMessage = document.getElementById('loginMessage');
+            registerUsernameInput = document.getElementById('registerUsername');
+            registerEmailInput = document.getElementById('registerEmail');
+            registerPasswordInput = document.getElementById('registerPassword');
+            performRegisterBtn = document.getElementById('performRegisterBtn');
+            registerMessage = document.getElementById('registerMessage');
+            resetEmailInput = document.getElementById('resetEmail');
+            performResetBtn = document.getElementById('performResetBtn');
+            resetMessage = document.getElementById('resetMessage');
+            forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            closeButtons = document.querySelectorAll('.close-button');
+
+            startGameBtn = document.getElementById("start-game-btn");
+            gameOutput = document.getElementById("game-output");
+            gameAnswerInput = document.getElementById("game-answer-input");
+            submitGameAnswerBtn = document.getElementById("submit-game-answer-btn");
+
+            virtualCityInput = document.getElementById("virtual-city");
+            virtualDaysInput = document.getElementById("virtual-days");
+            virtualDurationMinutesInput = document.getElementById("virtual-duration-minutes");
+            virtualActivitiesInput = document.getElementById("virtual-activities");
+            virtualImagePromptInput = document.getElementById("virtual-image-prompt");
+            virtualTourCostEl = document.getElementById("virtual-tour-cost");
+            startVirtualBtn = document.getElementById("start-virtual-btn");
+            virtualHolidayOutput = document.getElementById("virtual-holiday-output");
+            virtualOutputTitle = document.getElementById("virtual-output-title");
+            virtualOutputStory = document.getElementById("virtual-output-story");
+            virtualImagesContainer = document.getElementById("virtual-images-container");
+            sendVirtualImageEmailBtn = document.getElementById("send-virtual-image-email-btn");
+            virtualLoading = document.getElementById("virtual-loading");
+
+            aiPhotoAccessCheck = document.getElementById("ai-photo-access-check");
+            goToAiPhotoPaymentBtn = document.getElementById("go-to-ai-photo-payment-btn");
+            aiPhotoFormArea = document.getElementById("ai-photo-form-area");
+            aiPhotoPromptInput = document.getElementById("ai-photo-prompt");
+            aiPhotoStyleSelect = document.getElementById("ai-photo-style");
+            aiPhotoCountInput = document.getElementById("ai-photo-count");
+            generateAiPhotoButton = document.getElementById("generate-ai-photo-btn");
+            aiPhotoLoading = document.getElementById("ai-photo-loading");
+            aiPhotoOutput = document.getElementById("ai-photo-output");
+            generatedImagesContainer = document.getElementById("generated-images-container");
+            downloadAllImagesBtn = document.getElementById("download-all-images-btn");
+            downloadAllCostSpan = document.getElementById("download-all-cost");
+
+            vipAccessCheck = document.getElementById("vip-access-check");
+            goToVipPaymentBtn = document.getElementById("go-to-vip-payment-btn");
+            vipPlannerFormArea = document.getElementById("vip-planner-form-area");
+            vipDestinationInput = document.getElementById("vip-destination");
+            vipDurationInput = document.getElementById("vip-duration");
+            vipTravelersInput = document.getElementById("vip-travelers");
+            vipBudgetButtons = document.querySelectorAll("#vip-planner-section .budget-options button");
+            vipTypeSelect = document.getElementById("vip-type");
+            generateVipPlanBtn = document.getElementById("generate-vip-plan-btn");
+            vipPlannerLoading = document.getElementById("vip-planner-loading");
+            vipPlanOutput = document.getElementById("vip-plan-output");
+            vipPlanChatArea = document.getElementById("vip-plan-chat-area");
+            vipPlanChatBox = document.getElementById("vip-plan-chat-box");
+            vipPlanInput = document.getElementById("vip-plan-input");
+            sendVipPlanMessageBtn = document.getElementById("send-vip-plan-message-btn");
+
+            nicheTopicInput = document.getElementById("niche-topic");
+            nicheDetailsTextarea = document.getElementById("niche-details");
+            generateNichePlanBtn = document.getElementById("generate-niche-plan-btn");
+            nichePlanLoading = document.getElementById("niche-plan-loading");
+            nichePlanOutput = document.getElementById("niche-plan-output");
+
+            displayUserId = document.getElementById("display-userid");
+            displayUsername = document.getElementById("display-username");
+            displayUserEmail = document.getElementById("display-user-email");
+            setuserEmailBtn = document.getElementById("set-user-email-btn");
+            displayTatilpuan = document.getElementById("display-tatilpuan");
+            displayMembershipLevel = document.getElementById("display-membership-level");
+            displayGameScore = document.getElementById("display-game-score");
+            updateUsernameBtn = document.getElementById("update-username-btn");
+            palmCoinHistoryList = document.getElementById("palmcoin-history-list");
+
+            adminMessageInput = document.getElementById("admin-message-input");
+            updateAdminMessageBtn = document.getElementById("update-admin-message-btn");
+            adminMessageLoading = document.getElementById("admin-message-loading");
+            adminDisplayMessageEl = document.getElementById("admin-display-message");
+
+            timeTravelAccessCheck = document.getElementById("time-travel-access-check");
+            goToTimeTravelPaymentBtn = document.getElementById("go-to-time-travel-payment-btn");
+            timeTravelFormArea = document.getElementById("time-travel-form-area");
+            timeTravelEraInput = document.getElementById("time-travel-era");
+            timeTravelDurationInput = document.getElementById("time-travel-duration");
+            timeTravelCharacterInput = document.getElementById("time-travel-character");
+            timeTravelFocusInput = document.getElementById("time-travel-focus");
+            startTimeTravelBtn = document.getElementById("start-time-travel-btn");
+            timeTravelLoading = document.getElementById("time-travel-loading");
+            timeTravelOutput = document.getElementById("time-travel-output");
+
+            destinyAgeInput = document.getElementById("destiny-age");
+            destinyHobbyInput = document.getElementById("destiny-hobby");
+            destinyDreamInput = document.getElementById("destiny-dream");
+            destinyColorInput = document.getElementById("destiny-color");
+            predictDestinyBtn = document.getElementById("predict-destiny-btn");
+            destinyLoading = document.getElementById("destiny-loading");
+            destinyRouteOutput = document.getElementById("destiny-route-output");
+            realizeDestinyBtn = document.getElementById("realize-destiny-btn");
+
+            companionNameInput = document.getElementById("companion-name");
+            companionPersonalitySelect = document.getElementById("companion-personality");
+            createCompanionBtn = document.getElementById("create-companion-btn");
+            companionChatArea = document.getElementById("companion-chat-area");
+            activeCompanionName = document.getElementById("active-companion-name");
+            companionChatBox = document.getElementById("companion-chat-box");
+            companionInput = document.getElementById("companion-input");
+            sendCompanionMessageBtn = document.getElementById("send-companion-message-btn");
+            companionLoading = document.getElementById("companion-loading");
+
+            cardNumberInput = document.getElementById("card-number");
+            expiryDateInput = document.getElementById("expiry-date");
+            cvvInput = document.getElementById("cvv");
+            cardHolderNameInput = document.getElementById("card-holder-name");
+            completePaymentBtn = document.getElementById("complete-payment-btn");
+
+            contactSubjectInput = document.getElementById('contact-subject');
+            contactEmailInput = document.getElementById('contact-email');
+            contactMessageInput = document.getElementById('contact-message');
+            contactFileInput = document.getElementById('contact-file');
+            sendContactFormBtn = document.getElementById('send-contact-form-btn');
+            contactLoading = document.getElementById('contact-loading');
+
+
+            // Buradan itibaren uygulama başlatma ve olay dinleyicileri kodunuz devam eder
             window.initializeAppFeatures();
 
             sidebarButtons.forEach(button => {
@@ -1304,7 +1260,6 @@
                 window.speak(`Language changed to ${languageSelect.options[languageSelect.selectedIndex].text}.`);
             });
 
-            // Avatar kaldırıldığı için bu satır gereksiz: avatarEl.addEventListener('click', () => window.showSection("user-info-section"));
             modalConfirmBtn.addEventListener("click", () => hideModal(appModal));
 
             // Giriş/Kayıt Modal butonları
@@ -1343,7 +1298,7 @@
                 if (event.target == loginModal) hideModal(loginModal);
                 if (event.target == registerModal) hideModal(registerModal);
                 if (event.target == forgotPasswordModal) hideModal(forgotPasswordModal);
-                if (event.target == appModal) hideModal(appModal); // appModal'ı dışına tıklayarak kapatmayı sağla
+                if (event.target == appModal) hideModal(appModal);
             });
 
             // Kayıt İşlemi
@@ -1380,14 +1335,12 @@
 
                     registerMessage.textContent = 'Kayıt başarılı! Hoş geldiniz. Şimdi giriş yapabilirsiniz.';
                     registerMessage.style.color = 'green';
-                    // Firebase Cloud Function'ı çağır
                     try {
                         const sendWelcomeEmailCallable = firebase.functions().httpsCallable('sendWelcomeEmail');
                         await sendWelcomeEmailCallable({ email: email, username: username });
                         console.log("Hoş geldin e-postası Cloud Function tarafından çağrıldı.");
                     } catch (e) {
                         console.error("Hoş geldin e-postası Cloud Function çağrılırken hata:", e);
-                        // Hata durumunda bile kullanıcıya kayıt başarılı mesajını göstermeye devam et
                     }
 
                     setTimeout(() => {
@@ -1488,7 +1441,7 @@
                 gameActive = true;
                 currentQuestionIndex = 0;
                 gameScore = 0;
-                if (currentUserId) { // Giriş yapmışsa puanı sıfırla
+                if (currentUserId) {
                     window.updateUserProfile({ gameScore: gameScore });
                 }
                 gameOutput.innerHTML = `<p><strong>Palmiye Kaptan:</strong> Tatil Avı oyununa hoş geldin! Sana 3 soru soracağım. Doğru cevap verirsen PalmCoin kazanacaksın!</p>`;
@@ -1505,7 +1458,7 @@
             });
 
             async function askNextGameQuestion() {
-                if (currentQuestionIndex < 3) { // Toplam 3 soru soralım
+                if (currentQuestionIndex < 3) {
                     gameOutput.innerHTML += `<p><i class="fas fa-spinner fa-spin"></i> Palmiye Kaptan yeni soru hazırlıyor...</p>`;
                     gameAnswerInput.value = "";
                     gameAnswerInput.focus();
@@ -1515,7 +1468,7 @@
                             Format the response as 'Soru: [Question Text] Seçenekler: (A) [Option A] (B) [Option B] (C) [Option C] Cevap: [Correct Option Letter (e.g.: A)]'.
                             Ensure options are clearly labeled (A), (B), (C). Provide in Turkish.`,
                             "openai/gpt-3.5-turbo",
-                            null // Bu küçük çağrı için özel yükleme göstergesi yok
+                            null
                         );
 
                         const questionMatch = aiResponse.match(/Soru:\s*(.*?)\s*Seçenekler:\s*(.*?)\s*Cevap:\s*([A-C])/i);
@@ -1524,14 +1477,13 @@
                             const optionsText = questionMatch[2].trim();
                             const correctAnswer = questionMatch[3].trim().toUpperCase();
 
-                            // Seçenekleri daha sağlam bir şekilde ayrıştır
                             const optionsArray = [];
-                            const optionRegex = /\(([A-C])\)\s*([^)(]+)/g; // (A) Metin, (B) Metin eşleştir
+                            const optionRegex = /\(([A-C])\)\s*([^)(]+)/g;
                             let match;
                             while ((match = optionRegex.exec(optionsText)) !== null) {
                                 optionsArray.push(`(${match[1].toUpperCase()}) ${match[2].trim()}`);
                             }
-                            if (optionsArray.length === 0 && optionsText) { // Regex başarısız olursa, yaygın ayırıcılarla böl
+                            if (optionsArray.length === 0 && optionsText) {
                                 const rawOptions = optionsText.split(/ \(B\) | \(C\) /).map(s => s.trim());
                                 if (rawOptions[0]) optionsArray.push(`(A) ${rawOptions[0].replace('(A) ', '')}`);
                                 if (rawOptions[1]) optionsArray.push(`(B) ${rawOptions[1].replace('(B) ', '')}`);
@@ -1540,7 +1492,7 @@
 
                             currentGameQuestion = {
                                 question: questionText,
-                                options: optionsArray.length > 0 ? optionsArray : [optionsText], // Ayrıştırılmış seçenekleri veya yedeği kullan
+                                options: optionsArray.length > 0 ? optionsArray : [optionsText],
                                 answer: correctAnswer,
                                 points: 20 + (currentQuestionIndex * 5)
                             };
@@ -1570,13 +1522,13 @@
                 }
 
                 const userAnswer = answer.trim().toUpperCase();
-                gameAnswerInput.value = ""; // Girişi hemen temizle
+                gameAnswerInput.value = "";
 
                 if (userAnswer === currentGameQuestion.answer) {
                     gameOutput.innerHTML += `<p style="color: green;"><strong>Palmiye Kaptan:</strong> Tebrikler! Doğru cevap. (+${currentGameQuestion.points} PalmCoin)</p>`;
                     window.speak("Tebrikler! Doğru cevap.");
                     gameScore += currentGameQuestion.points;
-                    if (currentUserId) { // Giriş yapmışsa puanı güncelle
+                    if (currentUserId) {
                         await window.updateUserProfile({ gameScore: gameScore });
                     }
                     window.updateTatilPuan(currentGameQuestion.points, `Tatil Avı Oyunu (Soru ${currentQuestionIndex + 1})`);
@@ -1600,10 +1552,9 @@
                 gameAnswerInput.style.display = "none";
                 submitGameAnswerBtn.style.display = "none";
                 startGameBtn.style.display = "block";
-                window.displayMembershipInfo(); // Kullanıcı bilgilerini yenile
+                window.displayMembershipInfo();
             }
 
-            // Sanal tur dakika maliyeti güncelleme dinleyicisi
             virtualDurationMinutesInput.addEventListener("input", () => {
                 const minutes = parseInt(virtualDurationMinutesInput.value) || 0;
                 virtualTourCostEl.textContent = (minutes * VIRTUAL_TOUR_COST_PER_MINUTE);
@@ -1632,7 +1583,6 @@
                 sendVirtualImageEmailBtn.style.display = 'none';
                 generatedVirtualImageUrl = '';
 
-                // Kullanıcı puanını düş ve modali göster
                 await window.updateTatilPuan(-totalCost, `Sanal Tatil Oluşturma (${city}, ${days} gün)`);
                 window.showModal("Ödeme Alındı", `${totalCost} PalmCoin bakiyenizden düşüldü. Sanal tatiliniz hazırlanıyor...`);
 
@@ -1666,7 +1616,6 @@
                 virtualOutputStory.innerHTML = fullStoryHtml;
                 virtualHolidayOutput.style.display = "block";
 
-                // Hediye görselini oluştur
                 generatedVirtualImageUrl = await window.callImageGenerationAI(imagePrompt, virtualLoading);
                 if (generatedVirtualImageUrl) {
                     const giftImageEl = document.createElement('img');
@@ -1681,7 +1630,6 @@
                     sendVirtualImageEmailBtn.style.display = 'block';
                 }
 
-                // Günlük görselleri oluştur (eğer varsa)
                 if (hasDailyImagePrompts) {
                     window.showModal("Görseller Oluşturuluyor", `Sanal tatiliniz için ${imagePromptsForDays.length} adet özel görsel hazırlanıyor...`);
                     for (let i = 0; i < imagePromptsForDays.length; i++) {
@@ -1718,11 +1666,11 @@
                 }
 
                 let emailToSendTo = userEmail;
-                if (emailToSendTo === "Ayarlanmadı" || !emailToSendTo) { // Boş string kontrolü de ekle
+                if (emailToSendTo === "Ayarlanmadı" || !emailToSendTo) {
                     const newEmail = prompt("Hediye resmi göndermek için lütfen e-posta adresinizi girin:");
                     if (newEmail && newEmail.trim() !== "") {
                         emailToSendTo = newEmail.trim();
-                        if (currentUserId) { // Giriş yapmışsa e-postayı güncelle
+                        if (currentUserId) {
                             await window.updateUserProfile({ email: emailToSendTo });
                         }
                         window.displayMembershipInfo();
@@ -1731,9 +1679,8 @@
                         return;
                     }
                 }
-                // Cloud Function'ı çağır
                 try {
-                    const sendWelcomeEmailCallable = firebase.functions().httpsCallable('sendWelcomeEmail'); // sendWelcomeEmail adını yeniden kullanıyoruz, daha geneli için değiştirilebilir
+                    const sendWelcomeEmailCallable = firebase.functions().httpsCallable('sendWelcomeEmail');
                     await sendWelcomeEmailCallable({ email: emailToSendTo, username: userName || "Değerli Kullanıcımız", imageUrl: generatedVirtualImageUrl, subject: "Sanal Tatil Hediye Resminiz!" });
                     window.showModal("E-posta Gönderiliyor", `Hediye resminiz ${emailToSendTo} adresine gönderildi.`);
                     window.speak("Hediye resminiz e-postanıza gönderildi.");
@@ -1858,7 +1805,7 @@
                 vipPlanOutput.style.display = "none";
                 vipPlanChatArea.style.display = "none";
                 vipPlanChatBox.innerHTML = '';
-                currentVipPlan = ""; // Mevcut VIP planı sıfırla
+                currentVipPlan = "";
 
                 const prompt = `Please create a very detailed, comprehensive, and personalized A-to-Z holiday plan for ${destination} for ${duration} days, for ${travelers} people, with a ${selectedBudget} budget, and a ${travelType} theme.
                                 Include flight suggestions (example airline and approximate price range), hotel suggestions (example hotel name, price range, proximity to location, and features), airport transfer suggestions (how to do it, approximate cost), daily detailed places to visit/activities/food suggestions (specific places and tastes for morning, noon, and evening).
@@ -1869,7 +1816,6 @@
                 currentVipPlan = reply;
                 let planContent = reply;
 
-                // AI yanıtından olası bir görsel URL'si bulmak için Regex
                 const urlRegex = /(https?:\/\/[^\s]+\.(?:png|jpe?g|gif|webp|unsplash\.com\/\S+|pixabay\.com\/\S+))/i;
                 const match = planContent.match(urlRegex);
                 let mediaHtml = "";
@@ -1877,12 +1823,11 @@
                     mediaHtml = `<br><img src="${match[0]}" alt="${destination} Planı">`;
                     planContent = planContent.replace(match[0], '').trim();
                 } else {
-                    // AI özel bir görsel URL'si sağlamazsa, genel bir Unsplash görseline yedekle
-                    const genericImageUrl = await window.callImageGenerationAI(`${destination} travel plan`, null); // Görsel oluşturma API'ı çağrısı
+                    const genericImageUrl = await window.callImageGenerationAI(`${destination} travel`, null);
                     mediaHtml = `<br><img src="${genericImageUrl}" alt="${destination} Planı">`;
                 }
 
-                vipPlanOutput.innerHTML = `<h4>${destination} için ${duration} Günlük VIP Tatil Planınız:</h4><p>${planContent.replace(/\n/g, '<br>')}</p>${mediaHtml}`; // Yeni satırları <br> ile değiştir
+                vipPlanOutput.innerHTML = `<h4>${destination} için ${duration} Günlük VIP Tatil Planınız:</h4><p>${planContent.replace(/\n/g, '<br>')}</p>${mediaHtml}`;
                 vipPlanOutput.style.display = "block";
                 vipPlanChatArea.style.display = "block";
                 window.speak(`${destination} için VIP tatil planınız hazır.`);
@@ -1951,24 +1896,24 @@
                     mediaHtml = `<br><img src="${match[0]}" alt="${nicheTopic} Niş Planı">`;
                     nichePlanContent = nichePlanContent.replace(match[0], '').trim();
                 } else {
-                    const genericImageUrl = await window.callImageGenerationAI(`${nicheTopic} travel`, null); // Görsel oluşturma API'ı çağrısı
+                    const genericImageUrl = await window.callImageGenerationAI(`${nicheTopic} travel`, null);
                     mediaHtml = `<br><img src="${genericImageUrl}" alt="${nicheTopic} Niş Planı">`;
                 }
 
-                nichePlanOutput.innerHTML = `<h4>Özel Niş Tur Planınız - "${nicheTopic}":</h4><p>${nichePlanContent.replace(/\n/g, '<br>')}</p>${mediaHtml}`; // Yeni satırları <br> ile değiştir
+                nichePlanOutput.innerHTML = `<h4>Özel Niş Tur Planınız - "${nicheTopic}":</h4><p>${nichePlanContent.replace(/\n/g, '<br>')}</p>${mediaHtml}`;
                 nichePlanOutput.style.display = "block";
                 window.speak(`Niş tur planınız hazır!`);
                 await window.updateTatilPuan(150, `Niş Plan Oluşturma (${nicheTopic})`);
             };
 
-            // Kullanıcı adı güncelleme butonu (ID: update-username-btn olarak güncellendi)
+            // Kullanıcı adı güncelleme butonu
             updateUsernameBtn.onclick = async () => {
                 const newName = prompt("Lütfen yeni kullanıcı adınızı girin:");
                 if (newName && newName.trim() !== "") {
                     userName = newName.trim();
-                    if (currentUserId) { // Giriş yapmışsa kullanıcı adını güncelle
-                        await auth.currentUser.updateProfile({ displayName: userName }); // Firebase Auth display name'i güncelle
-                        await window.updateUserProfile({ username: userName }); // Firestore 'username' alanını güncelle
+                    if (currentUserId) {
+                        await auth.currentUser.updateProfile({ displayName: userName });
+                        await window.updateUserProfile({ username: userName });
                     }
                     window.showModal("Hoş Geldin!", `Hoş geldin, **${userName}**! Kullanıcı adınız güncellendi.`);
                     window.speak(`Hoş geldin ${userName}!`);
@@ -1983,9 +1928,7 @@
                 const newEmail = prompt("Lütfen e-posta adresinizi girin:");
                 if (newEmail && newEmail.trim() !== "") {
                     userEmail = newEmail.trim();
-                    if (currentUserId) { // Giriş yapmışsa e-postayı güncelle
-                        // Firebase Auth e-posta güncelleme, kullanıcının yeniden kimlik doğrulamasını gerektirebilir.
-                        // Basit demo için Firestore'daki 'email' alanını güncelliyoruz.
+                    if (currentUserId) {
                         await window.updateUserProfile({ email: userEmail });
                     }
                     window.showModal("E-posta Güncellendi", `E-posta adresiniz **${userEmail}** olarak güncellendi.`);
@@ -2003,7 +1946,6 @@
                     window.showModal("Uyarı", "Lütfen yayınlamak istediğiniz mesajı girin.");
                     return;
                 }
-                // Cloud Function'ı çağır
                 await window.updateAdminMessage(message);
             };
 
@@ -2044,11 +1986,11 @@
                     mediaHtml = `<br><img src="${match[0]}" alt="${era} Dönemi">`;
                     storyContent = storyContent.replace(match[0], '').trim();
                 } else {
-                    const genericImageUrl = await window.callImageGenerationAI(`${era} travel`, null); // Görsel oluşturma API'ı çağrısı
+                    const genericImageUrl = await window.callImageGenerationAI(`${era} travel`, null);
                     mediaHtml = `<br><img src="${genericImageUrl}" alt="${era} Dönemi">`;
                 }
 
-                timeTravelOutput.innerHTML = `<h4>${era} Döneminde Zaman Yolculuğu Tatiliniz:</h4><p>${storyContent.replace(/\n/g, '<br>')}</p>${mediaHtml}`; // Yeni satırları <br> ile değiştir
+                timeTravelOutput.innerHTML = `<h4>${era} Döneminde Zaman Yolculuğu Tatiliniz:</h4><p>${storyContent.replace(/\n/g, '<br>')}</p>${mediaHtml}`;
                 timeTravelOutput.style.display = "block";
                 window.speak(`${era} dönemine yolculuk hikayeniz hazır.`);
                 await window.updateTatilPuan(75, `Zamanda Yolculuk (${era})`);
@@ -2087,7 +2029,7 @@
                     destinyContent = destinyContent.replace(imageMatch[0], '').trim();
                 }
 
-                destinyRouteOutput.innerHTML = `<h4>Kader Rotanızın Kehaneti:</h4><p>${destinyContent.replace(/\n/g, '<br>')}</p>`; // Yeni satırları <br> ile değiştir
+                destinyRouteOutput.innerHTML = `<h4>Kader Rotanızın Kehaneti:</h4><p>${destinyContent.replace(/\n/g, '<br>')}</p>`;
 
                 if (destinyImagePrompt) {
                     const imageUrl = await window.callImageGenerationAI(destinyImagePrompt, destinyLoading);
@@ -2125,7 +2067,7 @@
 
                 companionChatArea.style.display = "none";
                 companionChatBox.innerHTML = '';
-                companionChatHistory = []; // Yeni yoldaş için geçmişi sıfırla
+                companionChatHistory = [];
 
                 const prompt = `Please create an AI companion character named "${companionName}" with a "${personality}" personality, specializing in travel.
                                 Write a short, friendly introductory text for them and make their first greeting. Provide the response in Turkish. Be creative.`;
@@ -2154,7 +2096,7 @@
                     return;
                 }
 
-                const maxHistoryLength = 5; // Bağlam için son 5 mesajı tut
+                const maxHistoryLength = 5;
                 const recentHistory = companionChatHistory.slice(Math.max(0, companionChatHistory.length - maxHistoryLength));
 
                 const systemMessage = {
@@ -2163,11 +2105,8 @@
                                 Help the user with travel and holiday topics. Provide creative, friendly, and conversational responses in line with your personality.
                                 Maintain context by considering the user's previous messages.`
                 };
-                // Sistem mesajını her zaman ilk mesaj olarak gönder
                 const messagesToSend = [systemMessage, ...recentHistory];
 
-                // callOpenRouterAI'yi, mevcut geçmişi ve son kullanıcı mesajını içerecek şekilde çağır
-                // OpenRouter API, messages dizisi bekler.
                 const reply = await window.callOpenRouterAI(null, "openai/gpt-3.5-turbo", companionLoading, messagesToSend);
 
                 window.displayMessage("ai", reply, companionChatBox);
@@ -2192,35 +2131,34 @@
                     return;
                 }
 
-                // Demo amaçlı temel doğrulama (örn. kart numarası uzunluğu)
                 if (cardNumber.replace(/\s/g, '').length !== 16 || !/^\d{2}\/\d{2}$/.test(expiryDate) || !/^\d{3,4}$/.test(cvv)) {
                     window.showModal("Hata", "Lütfen geçerli kart bilgileri girin. (Demo için format önemi)");
                     return;
                 }
 
                 window.showModal("Ödeme İşleniyor...", "Ödemeniz simüle ediliyor. Lütfen bekleyin...");
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Ödeme işlemini simüle et
+                await new Promise(resolve => setTimeout(resolve, 2000));
 
                 userMembershipLevel = "Altın";
-                if (currentUserId) { // Giriş yapmışsa üyeliği güncelle
+                if (currentUserId) {
                     await window.updateUserProfile({ membershipLevel: userMembershipLevel });
                 }
-                await window.updateTatilPuan(200, "Altın Üyelik Satın Alma"); // VIP satın alımı için TatilPuan ver
+                await window.updateTatilPuan(200, "Altın Üyelik Satın Alma");
 
                 let discountMessage = "Tebrikler! Artık Altın Üyesiniz! Tüm VIP özelliklere erişiminiz var. Keyfini çıkarın!";
-                if (tatilPuan > 150) { // Bu satın alımdan önceki tatilPuan'ı kontrol et
+                if (tatilPuan > 150) {
                     const bonusPalmCoin = 100;
-                    gameScore += bonusPalmCoin; // gameScore'u doğrudan güncelle
-                    if (currentUserId) { // Giriş yapmışsa gameScore'u güncelle
+                    gameScore += bonusPalmCoin;
+                    if (currentUserId) {
                         await window.updateUserProfile({ gameScore: gameScore });
                     }
-                    await window.updateTatilPuan(bonusPalmCoin, "Altın Üyelik Bonusu"); // TatilPuan'a ayrı bir girdiyle bonus ekle
+                    await window.updateTatilPuan(bonusPalmCoin, "Altın Üyelik Bonusu");
                     discountMessage += `<br><br>Sadakatiniz için teşekkür ederiz! Yüksek TatilPuan'ınız sayesinde **${bonusPalmCoin} PalmCoin** hediye kazandınız!`;
                 }
 
                 window.showModal("Ödeme Başarılı!", discountMessage);
                 window.speak("Ödemeniz başarılı. Artık Altın üyesiniz!");
-                window.showSection("user-info-section"); // Kullanıcı bilgilerine yönlendir
+                window.showSection("user-info-section");
             };
 
             // Bize Ulaşın Formu Gönderimi
@@ -2228,7 +2166,7 @@
                 const subject = contactSubjectInput.value.trim();
                 const email = contactEmailInput.value.trim();
                 const message = contactMessageInput.value.trim();
-                const file = contactFileInput.files[0]; // Seçilen ilk dosya
+                const file = contactFileInput.files[0];
 
                 if (!subject || !email || !message) {
                     window.showModal("Eksik Bilgi", "Lütfen Konu, E-posta Adresi ve Mesaj alanlarını doldurun.");
@@ -2244,10 +2182,9 @@
                 if (file) {
                     fileName = file.name;
                     fileType = file.type;
-                    // Dosyayı base64 olarak oku
                     fileData = await new Promise((resolve) => {
                         const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result.split(',')[1]); // Sadece base64 kısmını al
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
                         reader.readAsDataURL(file);
                     });
                 }
@@ -2270,7 +2207,6 @@
                     window.showModal("Hata", `Mesajınız gönderilirken bir hata oluştu: ${e.message}`);
                 } finally {
                     if (contactLoading) contactLoading.style.display = 'none';
-                    // Formu temizle
                     contactSubjectInput.value = '';
                     contactEmailInput.value = userEmail !== "Ayarlanmadı" ? userEmail : '';
                     contactMessageInput.value = '';
@@ -2279,15 +2215,7 @@
             };
 
             // --- Slogan Güncelleme ---
-            // Slogan listesi zaten tanımlı.
-            function updateSlogan() {
-                if (sloganTop) {
-                    sloganTop.textContent = sloganList[currentSloganIndex];
-                }
-                currentSloganIndex = (currentSloganIndex + 1) % sloganList.length;
-            }
             setInterval(updateSlogan, 5000);
-            // updateSlogan(); // DOMContentLoaded içinde initialAppFeatures çağrıldığı için burada tekrar çağırmaya gerek yok.
 
             // --- Footer Yılını Güncelle ---
             const currentYearElement = document.getElementById('currentYear');
