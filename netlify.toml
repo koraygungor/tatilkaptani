@@ -4,9 +4,4 @@
 
 [functions]
   node_bundler = "esbuild"
-
-  # Netlify loglarında belirtilen yeni syntax'a göre düzeltildi
-  [functions.node_version]
-  # Node.js versiyonunuzu buraya tırnak içinde string olarak belirtin.
-  # Şu anda sadece versiyon belirtiyoruz, external_node_modules'a ihtiyacımız yok.
-  version = "18"
+  node_version = "18" # Node.js sürümünüzü kontrol edin (node -v komutuyla)
