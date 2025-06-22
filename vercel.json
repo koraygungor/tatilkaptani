@@ -2,7 +2,7 @@
   "rewrites": [
     { "source": "/.netlify/functions/:path*", "destination": "/api/:path*" }
   ],
-  "functions": {
+  ""functions"": {
     "api/**/*.js": {
       "runtime": "nodejs18.x"
     }
