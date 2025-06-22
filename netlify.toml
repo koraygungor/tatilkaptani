@@ -10,4 +10,3 @@
   [functions.node_version]
   # Node.js versiyonunuzu buraya tırnak içinde string olarak belirtin.
   version = "18"
-  
