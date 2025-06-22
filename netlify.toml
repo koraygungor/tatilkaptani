@@ -4,10 +4,5 @@
 
 [functions]
   node_bundler = "esbuild"
-
-  # Netlify loglarında belirtilen YENİ syntax'a göre düzeltildi
-  # node_version artık doğrudan bir anahtar değil, kendi [alt nesnesi] altında 'version' anahtarı olacak.
-  [functions.node_version]
-  # Node.js versiyonunuzu buraya tırnak içinde string olarak belirtin.
-  version = "18"
+  node_version = "18" # Node.js sürümünüzü kontrol edin (node -v komutuyla)
   
