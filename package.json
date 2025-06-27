@@ -25,5 +25,17 @@
     "eslint-config-google": "^0.14.0",
     "firebase-functions-test": "^3.1.0"
   },
-  "private": true
+  "private": true,
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koraygungor/tatilkaptani.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/koraygungor/tatilkaptani/issues"
+  },
+  "homepage": "https://github.com/koraygungor/tatilkaptani#readme"
 }

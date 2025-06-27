@@ -1,13 +1,15 @@
 {
-  "name": "functions",
+  "name": "tatilkaptani-final",
   "version": "1.0.0",
+  "description": "Yapay Zeka Destekli Tatil Planlama Sitesi",
   "main": "index.js",
-  "engines": {
-    "node": "18"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "firebase-functions": "^6.3.2",
-    "firebase-admin": "^13.4.0",
-    "cors": "^2.8.5"
+  "keywords": [],
+  "author": "Koray Güngör",
+  "license": "ISC",
+  "engines": {
+    "node": "18" // Veya Netlify'ın desteklediği daha kararlı bir LTS versiyonu (örn. "16", "20")
   }
 }
