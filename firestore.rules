@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Herkesin 'public/data/admin/message' belgesini okumasına izin ver
+    match /public/data/admin/message {
+      allow read: if true; // Herkes okuyabilir
+      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Kullanıcıların yalnızca kendi profillerini okuyup yazmasına izin ver
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Kullanıcıların kendi sohbet geçmişlerini okuyup yazmasına izin ver
+    match /users/{userId}/chatHistory/{document=**} {
+      allow read, create: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Genel olarak diğer tüm koleksiyonları kısıtla (varsayılan)
+    match /{document=**} {
+      allow read, write: if false; // Varsayılan olarak tüm diğer verilere erişimi kısıtla
+    }
+  }
+}
