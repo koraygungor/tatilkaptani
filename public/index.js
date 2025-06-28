@@ -5,16 +5,16 @@ const IMAGE_DOWNLOAD_COST_PER_IMAGE = 50;
 const VIRTUAL_TOUR_COST_PER_MINUTE = 10;
 const VIP_PLAN_CHAT_COST = 10;
 
-// Firebase yapılandırması - KENDİ BİLGİLERİNİZİ GİRİN!
+// Firebase yapılandırması - KENDİ BİLGİLERİNİZİ BURAYA GİRİN!
 // Bu bilgiler Firebase Console'dan alınmalıdır. Güvenli kabul edilir.
 const firebaseConfig = {
-    apiKey: "AIzaSyBpxneBV1JQQdyvhPqtt6OG_jl0WbyAMUU", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN
-    authDomain: "tatilkaptanifinal.firebaseapp.com", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN
-    projectId: "tatilkaptanifinal", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN
-    storageBucket: "tatilkaptanifinal.firebasestorage.app", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN
-    messagingSenderId: "748801975441", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN
-    appId: "1:748801975441:web:cc26b7b825fafe44658b30", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN (Virgül hatası düzeltildi)
-    measurementId: "G-0BQJQ25XX1", // Burayı KENDİ BİLGİNİZLE DEĞİŞTİRİN (Virgül eklendi)
+    apiKey: "YOUR_FIREBASE_CLIENT_API_KEY", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
+    projectId: "YOUR_PROJECT_ID", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
+    storageBucket: "YOUR_PROJECT_ID.appspot.com", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
+    appId: "YOUR_APP_ID", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
+    measurementId: "YOUR_MEASUREMENT_ID", // Burayı KENDİ GERÇEK BİLGİNİZLE DEĞİŞTİRİN
 };
 
 // Firebase'i başlat
@@ -186,7 +186,7 @@ const timeTravelEraInput = document.getElementById("time-travel-era");
 const timeTravelDurationInput = document.getElementById("time-travel-duration");
 const timeTravelCharacterInput = document.getElementById("time-travel-character");
 const timeTravelFocusInput = document.getElementById("time-travel-focus");
-const startTimeTravelBtn = document = document.getElementById("start-time-travel-btn");
+const startTimeTravelBtn = document.getElementById("start-time-travel-btn");
 const timeTravelLoading = document.getElementById("time-travel-loading");
 const timeTravelOutput = document.getElementById("time-travel-output");
 
@@ -374,12 +374,12 @@ window.loadAds = async function() {
     //             adElement.target = '_blank';
     //             adElement.classList.add('ad-area-dynamic');
     //             adElement.innerHTML = `<img src="${ad.imageUrl}" alt="${ad.title}"><p>${ad.text}</p>`;
-    //             dynamicAdsContainer.appendChild(adElement);
-    //         });
-    //     }
-    // } catch (error) {
-    //     console.error("Dinamik reklamlar yüklenirken hata:", error);
-    // }
+//             dynamicAdsContainer.appendChild(adElement);
+//         });
+//     }
+// } catch (error) {
+//     console.error("Dinamik reklamlar yüklenirken hata:", error);
+// }
 };
 
 // Yönetici Mesajını Yükleme (Artık Firebase Cloud Function üzerinden çağrılıyor)
@@ -453,7 +453,6 @@ window.showModal = function(title, message) {
     return new Promise((resolve) => {
         const handleConfirm = () => {
             modal.style.display = "none";
-            // Buradaki 'modalConfirmBtnBtn' yerine 'modalConfirmBtnEl' olmalıydı.
             // Hata düzeltildi: modalConfirmBtnBtn -> modalConfirmBtnEl
             modalConfirmBtnEl.removeEventListener("click", handleConfirm);
             modalConfirmBtnEl._eventListener = null;
@@ -574,11 +573,14 @@ window.showSection = function(sectionId) {
         activeSection.style.display = "flex";
     }
 
-    sidebarButtons.forEach(button => button.classList.remove("active"));
-    const activeButton = document.querySelector(`.sidebar-nav button[data-section='${sectionId}']`);
-    if (activeButton) {
-        activeButton.classList.add("active");
-    }
+    // BU KISIM `DOMContentLoaded` BLOĞU İÇİNDE YER ALDIĞI İÇİN BURADAN KALDIRILMALIYDI.
+    // `sidebarButtons.forEach` çağrısı sadece bir kez, HTML yüklendiğinde yapılmalı.
+    // sidebarButtons.forEach(button => {
+    //     button.addEventListener("click", () => {
+    //         const sectionId = button.dataset.section;
+    //         window.showSection(sectionId);
+    //     });
+    // }); 
 
     if (sectionId === "vip-planner-section") {
         window.checkVipAccess(document.getElementById("vip-access-check"), document.getElementById("vip-planner-form-area"), "Altın");
@@ -975,11 +977,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentUserId) {
             window.updateUserProfile({ gameScore: gameScore });
         }
-        gameOutput.innerHTML = `<p><strong>Palmiye Kaptan:</strong> Tatil Avı oyununa hoş geldin! Sana 3 soru soracağım. Doğru cevap verirsen PalmCoin kazanacaksın!</p>`;
+        gameOutput.innerHTML = `<p><strong>Palmiye Kaptan:</strong> Tatil Avı oyununa hoş geldiniz! Size 3 soru soracağım. Doğru cevap verirseniz PalmCoin kazanacaksınız!</p>`;
         gameAnswerInput.style.display = "block";
         submitGameAnswerBtn.style.display = "block";
         startGameBtn.style.display = "none";
-        window.speak("Tatil Avı oyununa hoş geldin! Sana üç soru soracağım. Doğru cevap verirsen PalmCoin kazanacaksın!");
+        window.speak("Tatil Avı oyununa hoş geldiniz! Size üç soru soracağım. Doğru cevap verirseniz PalmCoin kazanacaksınız!");
         setTimeout(askNextGameQuestion, 2000);
     };
 
@@ -1078,8 +1080,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function endGame() {
         gameActive = false;
-        gameOutput.innerHTML += `<p><strong>Palmiye Kaptan:</strong> Oyun bitti! Toplam **${gameScore} PalmCoin** kazandın! TatilPuan'ın güncellendi.</p>`;
-        window.speak(`Oyun bitti! Toplam ${gameScore} PalmCoin kazandın!`);
+        gameOutput.innerHTML += `<p><strong>Palmiye Kaptan:</strong> Oyun bitti! Toplam **${gameScore} PalmCoin** kazandınız! TatilPuan'ınız güncellendi.</p>`;
+        window.speak(`Oyun bitti! Toplam ${gameScore} PalmCoin kazandınız!`);
         gameAnswerInput.style.display = "none";
         submitGameAnswerBtn.style.display = "none";
         startGameBtn.style.display = "block";
@@ -1380,7 +1382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         window.displayMessage("user", userQuestion, vipPlanChatBox);
-        companionChatHistory.push({ role: "user", content: userQuestion });
+        // BU SATIR: companionChatHistory.push({ role: "user", content: userQuestion }); // Bu kısım vipPlanChat'e özel değil, genel chat geçmişine ekleniyor gibi duruyor
         vipPlanInput.value = "";
 
         // VIP Plan Chat'i için prompt
@@ -1453,6 +1455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.displayMembershipInfo();
         } else {
             window.showModal("Bilgi", "Ad girilmediği için mevcut adınız değişmedi.");
+            console.warn("Kullanıcı adı güncellenmedi: Giriş geçersiz.");
         }
     };
 
@@ -1535,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const destinyColor = destinyColorInput.value.trim();
 
         if (!age || !hobby || !destinyDream) {
-            window.showModal("Eksik Bilgi", "Lütfen yaşınızı, hobinizi ve hayalinizi girin.");
+            window.showModal("Eksik Bilgi", "Lütfen yaşınızı, hobinizi ve hayalinizin ana temasını girin.");
             return;
         }
 
@@ -1618,7 +1621,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!userMessage) return;
 
         window.displayMessage("user", userMessage, companionChatBox);
-        companionChatHistory.push({ role: "user", content: userMessage });
+        companionChatHistory.push({ role: "user", content: userMessage }); // Bu satır doğru.
         companionInput.value = "";
 
         if (!aiCompanion) {
